@@ -6,7 +6,7 @@ from celery import shared_task
 
 
 @shared_task(name="send_habits_task")
-def Re():
+def send_habits():
     """
     Задача для асинхронной отправки в телеграмм напоминания о выполнении действия,
     чтобы стать в будущем полезной привычкой
