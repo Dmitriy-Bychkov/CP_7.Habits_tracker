@@ -148,8 +148,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE-SIZE': 4,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -158,6 +156,7 @@ REST_FRAMEWORK = {
     ]
 }
 
+# Getting user's tokens settings
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -174,5 +173,12 @@ CSRF_TRUSTED_ORIGINS = [
 
 CORS_ALLOW_ALL_ORIGINS = False
 
+# Celery settings
 CELERY_BROKER_URL = os.getenv('CACHE_LOCATION')
 CELERY_RESULT_BACKEND = os.getenv('CACHE_LOCATION')
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Telegram API-token
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
