@@ -1,5 +1,4 @@
-# Course work №7 - "Tracker of userful habits"
-# The project using Django DRF framework.
+# Course work №7 - "Tracker of userful habits". The project using Django DRF framework.
 
 ## Description
 The "REST API service" of the userful habits tracker SPA application is implemented.
@@ -38,7 +37,7 @@ Fill out the file according to your personal data.
 - Create the superuser:
     * python3 manage.py csu
 - Create a telegram bot for send notifications to users and write your token into the .env file
-- 
+
 To run the project, enter following commands in the terminal windows:
 - python3 manage.py runserver
 - celery -A config worker -l INFO -c 1
