@@ -1,4 +1,6 @@
-# Course work №7 - "Tracker of userful habits" - The project using Django DRF framework.
+# Course work №7 - "Tracker of userful habits".
+# The project using Django DRF framework.
+
 
 ## Description
 The "REST API service" of the userful habits tracker SPA application is implemented.
@@ -44,5 +46,5 @@ To run the project, enter following commands in the terminal windows:
 - celery -A config beat -l info -S django 
 
 ## The main working links
-To read an API documentation follow the next link: http://127.0.0.1:8000/redoc/
-To log in to the admin panel, follow this link: http://127.0.0.1:8000/admin/
+- To read an API documentation follow the next link: http://127.0.0.1:8000/redoc/
+- To log in to the admin panel, follow this link: http://127.0.0.1:8000/admin/
