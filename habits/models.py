@@ -1,5 +1,7 @@
 from django.db import models
 from config import settings
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 NULLABLE = {'blank': True, 'null': True}
 
@@ -32,6 +34,38 @@ class Habit(models.Model):
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='владелец привычки',
                               **NULLABLE)
+
+    def reminder_datetime(self) -> datetime:
+        """ Возвращает ближайшую запланированную дату и время напоминания  """
+
+        now = datetime.now()
+
+        # Проходим 7 дневыный цикл по дням
+        for d in range(7):
+            if self.frequency == self.Frequency.daily:
+                break
+
+            # Прибавляем к текущему дню на один день больше
+            dt = now + timedelta(days=d)
+
+            # Выделяем только дни недели
+            day = dt.strftime('%A')
+
+            if self.frequency == day:
+                now = dt
+                break
+
+        reminder_dt = datetime(
+            year=now.year,
+            month=now.month,
+            day=now.day,
+            hour=self.time.hour,
+            minute=self.time.minute,
+            second=self.time.second,
+            tzinfo=timezone.get_current_timezone()
+        )
+
+        return reminder_dt
 
     def __str__(self):
         return f'{self.owner} - {self.action}'
