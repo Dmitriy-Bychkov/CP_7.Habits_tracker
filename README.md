@@ -1,4 +1,4 @@
-# Course work №7 - "Tracker of userful habits". The project using Django DRF framework.
+# Course work №7 - "Tracker of userful habits" - The project using Django DRF framework.
 
 ## Description
 The "REST API service" of the userful habits tracker SPA application is implemented.
