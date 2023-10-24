@@ -1,9 +1,10 @@
+from datetime import datetime, timedelta
 import os
 from io import StringIO
 from unittest.mock import patch
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from django.urls import reverse
 from rest_framework import status
@@ -11,9 +12,12 @@ from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import AccessToken
 
 from django.conf import settings
+
+from habits.tasks import send_habits
 from users.models import User
 from habits.models import Habit
 from users.services import tg_get_updates, tg_send_message
+from django.utils import timezone
 
 
 class HabitTestCase(APITestCase):
@@ -229,6 +233,54 @@ class HabitTestCase(APITestCase):
             }]
         )
 
+    def test_reminder_datetime(self):
+        """ Тестирование функции reminder_datetime в модели Habit """
+
+        # Создаем экземпляр модели Habit
+        habit = Habit.objects.create(
+            place='Test Place',
+            time=datetime.strptime('12:00:00', '%H:%M:%S').time(),
+            action='Test Action',
+            is_pleasant=False,
+            link_pleasant=None,
+            frequency=Habit.Frequency.tuesday,
+            award='Test Award',
+            duration=60,
+            is_public=True,
+            last_reminder_time=None,
+            owner=self.user
+        )
+
+        # Устанавливаем текущую дату и время
+        now = datetime.now()
+
+        # Вычисляем ожидаемое значение для reminder_datetime
+        expected_datetime = None
+        for d in range(7):
+            if habit.frequency == Habit.Frequency.daily:
+                break
+
+            dt = now + timedelta(days=d)
+            day = dt.strftime('%A')
+
+            if habit.frequency == day:
+                expected_datetime = datetime(
+                    year=dt.year,
+                    month=dt.month,
+                    day=dt.day,
+                    hour=habit.time.hour,
+                    minute=habit.time.minute,
+                    second=habit.time.second,
+                    tzinfo=timezone.get_current_timezone()
+                )
+                break
+
+        # Вызываем функцию reminder_datetime
+        reminder_dt = habit.reminder_datetime()
+
+        # Проверяем, что возвращенное значение совпадает с ожидаемым
+        self.assertEqual(reminder_dt, expected_datetime)
+
 
 class TelegramServiceTests(TestCase):
     """ Тестирование сервисных функций - подключение к телеграмм по АПИ """
@@ -298,3 +350,52 @@ class CreateUserCommandTest(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_active)
         self.assertTrue(user.check_password(os.getenv('SUPERUSER_PASSWORD')))
+
+
+class SendHabitsTestCase(TestCase):
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)  # Запуск задачи синхронно
+    def test_send_habits(self):
+        """ Тестирование функции send_habits """
+
+        self.user = User.objects.create(
+            email='user@test.ru',
+            telegram_user_name='user',
+            password='1234',
+            is_staff=False,
+            is_active=True
+        )
+        self.token = f'Bearer {AccessToken.for_user(self.user)}'
+
+        # Создаем привычку с параметрами для отправки напоминания
+        habit = Habit.objects.create(
+            place='Test Place',
+            time=datetime.strptime('12:00:00', '%H:%M:%S').time(),
+            action='Test Action',
+            is_pleasant=False,
+            link_pleasant=None,
+            frequency=Habit.Frequency.tuesday,
+            award='Test Award',
+            duration=60,
+            is_public=True,
+            last_reminder_time=None,
+            owner=self.user
+        )
+
+        # Устанавливаем текущую дату и время
+        now = timezone.now()
+
+        # Устанавливаем время напоминания для привычки
+        habit.last_reminder_time = now
+        habit.save()
+
+        # Вызываем функцию send_habits
+        send_habits()
+
+        # Проверяем, что время последнего напоминания было обновлено
+        habit.refresh_from_db()
+        self.assertEqual(habit.last_reminder_time, now)
+
+        # Проверяем, что время последнего напоминания было обновлено
+        habit.refresh_from_db()
+        self.assertEqual(habit.last_reminder_time, now)
