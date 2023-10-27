@@ -1,5 +1,4 @@
 from rest_framework.serializers import ValidationError
-from habits.models import Habit
 
 
 class DurationValidator:
@@ -12,7 +11,7 @@ class DurationValidator:
         duration = dict(value).get(self.field)
         duration = int(duration)
         if duration > 120:
-            raise ValidationError(f'Продолжительность задачи не может быть больше 120 минут!')
+            raise ValidationError('Продолжительность задачи не может быть больше 120 минут!')
 
 
 class AwardValidator:
@@ -50,7 +49,6 @@ class PleasantHabitValidator:
     def __call__(self, value):
         link_pleasant = dict(value).get(self.field)
         if link_pleasant:
-            pleasant_habit = Habit.objects.get(pk=link_pleasant)
-            if not pleasant_habit.is_pleasant:
+            if not link_pleasant.is_pleasant:
                 raise ValidationError(
                     'В связанные привычки могут попадать только привычки с признаком приятной привычки.')
