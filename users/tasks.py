@@ -30,7 +30,7 @@ def get_tg_chat_id():
             try:
                 user = User.objects.get(telegram_user_name=username)
             except User.DoesNotExist:
-                text = f'Давай досвидания! Тебя нет в нашей базе!'
+                text = 'Давай досвидания! Тебя нет в нашей базе!'
                 tg_send_message(chat_id, text)
 
                 # Очищаем все обновления чата
@@ -42,7 +42,7 @@ def get_tg_chat_id():
                 user.chat_id = chat_id
                 user.save()
 
-            text = f'Добро пожаловать!\nСюда будут приходить напоминания о ваших привычках!'
+            text = 'Добро пожаловать!\nСюда будут приходить напоминания о ваших привычках!'
             tg_send_message(chat_id, text)
 
             # Очищаем все обновления чата
@@ -52,14 +52,14 @@ def get_tg_chat_id():
             try:
                 user = User.objects.get(telegram_user_name=username)
             except User.DoesNotExist:
-                text = f'Пользователь не найден!'
+                text = 'Пользователь не найден!'
                 tg_send_message(chat_id, text)
 
                 # Очищаем все обновления чата
                 tg_get_updates(data_dict['update_id'] + 1)
                 continue
 
-            text = f'Нам очень жаль, что вы решили отписаться от уведомлений:(\nРассылка остановлена!'
+            text = 'Нам очень жаль, что вы решили отписаться от уведомлений:(\nРассылка остановлена!'
             tg_send_message(chat_id, text)
             user.chat_id = None
             user.save()
